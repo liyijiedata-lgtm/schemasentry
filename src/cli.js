@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { scanSqlToMarkdown } = require('./scanner');
+const { loadConfig } = require('./config');
 
 function usage() {
   return [
@@ -8,8 +9,9 @@ function usage() {
     '  schemasentry scan <schema.sql> --format md --out report.md',
     '',
     'Options:',
-    '  --format md   Output format (only md is supported in MVP)',
-    '  --out <file>  Write report to file (otherwise stdout)',
+    '  --format md          Output format (only md is supported in MVP)',
+    '  --out <file>         Write report to file (otherwise stdout)',
+    '  --config <file>      Optional config file (default: schemasentry.config.json if present)',
   ].join('\n');
 }
 
@@ -21,6 +23,7 @@ function parseArgs(args) {
   const schemaPath = args[1];
   let format = 'md';
   let outPath;
+  let configPath;
 
   for (let i = 2; i < args.length; i += 1) {
     const arg = args[i];
@@ -34,6 +37,11 @@ function parseArgs(args) {
       i += 1;
       continue;
     }
+    if (arg === '--config') {
+      configPath = args[i + 1];
+      i += 1;
+      continue;
+    }
     throw new Error(`Unknown argument: ${arg}\n\n${usage()}`);
   }
 
@@ -41,19 +49,27 @@ function parseArgs(args) {
     throw new Error(`Unsupported format: ${format}. Only 'md' is available in MVP.`);
   }
 
-  return { command: 'scan', schemaPath, format, outPath };
+  return { command: 'scan', schemaPath, format, outPath, configPath };
 }
 
 async function main(args) {
   const parsed = parseArgs(args);
   const sql = fs.readFileSync(parsed.schemaPath, 'utf8');
-  const report = scanSqlToMarkdown(sql);
+
+  const defaultConfig = path.resolve('schemasentry.config.json');
+  const config = loadConfig(parsed.configPath || (fs.existsSync(defaultConfig) ? defaultConfig : null));
+
+  const report = scanSqlToMarkdown(sql, { config });
 
   if (parsed.outPath) {
     const abs = path.resolve(parsed.outPath);
     fs.mkdirSync(path.dirname(abs), { recursive: true });
     fs.writeFileSync(abs, report, 'utf8');
-    process.stdout.write(`SchemaSentry report written to ${abs}\n`);
+    if (config && config._path) {
+      process.stdout.write(`SchemaSentry report written to ${abs} (config: ${config._path})\n`);
+    } else {
+      process.stdout.write(`SchemaSentry report written to ${abs}\n`);
+    }
     return;
   }
 

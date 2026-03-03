@@ -31,15 +31,26 @@ if [[ "$COMMENT_MODE" == "comment" ]] && [[ -n "${GITHUB_TOKEN:-}" ]] && [[ -n "
     echo "Posting SchemaSentry report comment to PR #$PR_NUMBER in $REPO"
 
     BODY=$(python3 - <<'PY'
-import json, os
+import json, os, re
 path = os.environ['REPORT_PATH']
 with open(path,'r',encoding='utf-8') as f:
     report = f.read()
+
+# Extract short summary counts (best-effort)
+get = lambda k: re.search(rf"^- {k}:\s*([0-9]+)\s*$", report, re.M)
+P0 = int(get('P0').group(1)) if get('P0') else 0
+P1 = int(get('P1').group(1)) if get('P1') else 0
+P2 = int(get('P2').group(1)) if get('P2') else 0
+
 # keep PR comments bounded
 max_len = 60000
 if len(report) > max_len:
     report = report[:max_len] + "\n\n...(truncated)"
-wrapped = "## SchemaSentry (schema risk scan)\n\n" + report
+
+header = "## SchemaSentry (schema risk scan)\n\n"
+summary = f"**Summary:** P0={P0} · P1={P1} · P2={P2}\n\n"
+
+wrapped = header + summary + "<details>\n<summary>Details</summary>\n\n" + report + "\n\n</details>\n"
 print(json.dumps({'body': wrapped}))
 PY
 )

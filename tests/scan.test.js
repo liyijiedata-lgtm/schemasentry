@@ -19,6 +19,10 @@ assert.ok(ids.includes('P2_JSON_USAGE'), 'should flag json usage');
 assert.ok(ids.includes('P2_SERIAL_USAGE'), 'should flag serial usage');
 assert.ok(ids.includes('P2_ENUM_USAGE'), 'should flag enum usage');
 
+// Ignore support (to reduce false positives)
+const ignored = scanSql(sql, { config: { ignore: { rules: ['P2_JSON_USAGE'], tables: [], columns: [] } } });
+assert.ok(!ignored.map((f) => f.id).includes('P2_JSON_USAGE'), 'ignore.rules should remove matching findings');
+
 const report = renderMarkdownReport(findings);
 assert.ok(report.includes('# SchemaSentry Report'), 'report should include title');
 assert.ok(report.includes('## Summary'), 'report should include summary');

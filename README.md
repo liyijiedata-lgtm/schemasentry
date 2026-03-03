@@ -42,6 +42,26 @@ npm run scan:example
 
 This writes an example report to `examples/report.md`.
 
+## Config (reduce false positives)
+
+Create `schemasentry.config.json` (optional):
+
+```json
+{
+  "ignore": {
+    "rules": ["P2_JSON_USAGE"],
+    "tables": ["public.event_log"],
+    "columns": ["orders.payload"]
+  }
+}
+```
+
+Run with:
+
+```bash
+schemasentry scan schema.sql --out report.md --config schemasentry.config.json
+```
+
 ## Output
 
 - Severity: **P0** (stop-ship), **P1** (high), **P2** (medium)
