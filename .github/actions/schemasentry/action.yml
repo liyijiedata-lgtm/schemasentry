@@ -1,0 +1,30 @@
+name: SchemaSentry
+description: Scan Postgres schema SQL and comment a risk report on PRs
+inputs:
+  schema_path:
+    description: Path to schema.sql (pg_dump --schema-only output)
+    required: true
+    default: schema.sql
+  report_path:
+    description: Path to write markdown report
+    required: false
+    default: schemasentry-report.md
+  fail_on_p0:
+    description: If true, fail the workflow when P0 findings > 0
+    required: false
+    default: 'false'
+  comment_mode:
+    description: comment | none
+    required: false
+    default: comment
+runs:
+  using: composite
+  steps:
+    - name: Run SchemaSentry
+      shell: bash
+      run: |
+        bash "${{ github.action_path }}/run.sh" \
+          "${{ inputs.schema_path }}" \
+          "${{ inputs.report_path }}" \
+          "${{ inputs.fail_on_p0 }}" \
+          "${{ inputs.comment_mode }}"

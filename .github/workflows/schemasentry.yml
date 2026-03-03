@@ -1,0 +1,28 @@
+name: SchemaSentry
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # If your repo generates schema.sql in CI, add that step here.
+      # For MVP, we assume a schema.sql exists in the repo (or is created by an earlier step).
+
+      - name: SchemaSentry scan & comment
+        uses: ./.github/actions/schemasentry
+        with:
+          schema_path: schema.sql
+          report_path: schemasentry-report.md
+          fail_on_p0: 'false' # shadow mode by default (high-precision, low disruption)
+          comment_mode: comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

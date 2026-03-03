@@ -54,9 +54,12 @@ See: [`rules/POSTGRES_RULES_V1.md`](rules/POSTGRES_RULES_V1.md)
 
 ## Roadmap
 
-- [ ] GitHub Action (PR comment + CI gate)
-- [ ] SARIF export
+- [x] MVP CLI: scan schema.sql → Markdown report
+- [x] GitHub Action (PR comment) (shadow mode)
+- [ ] CI gate (fail on P0, configurable, confidence-aware)
 - [ ] Config file (ignore/allowlist)
+- [ ] SARIF export
+- [ ] Pro ruleset hooks (core vs pro)
 - [ ] Connect-to-DB mode (introspect via `information_schema`)
 
 ## License
