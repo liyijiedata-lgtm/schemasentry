@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+const path = require('path');
+const cli = require(path.join(__dirname, '..', 'src', 'cli.js'));
+
+cli.main(process.argv.slice(2)).catch((err) => {
+  const message = err && err.message ? err.message : String(err);
+  console.error(`Error: ${message}`);
+  process.exit(1);
+});

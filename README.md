@@ -32,6 +32,16 @@ pg_dump --schema-only --no-owner --no-privileges "$DATABASE_URL" > schema.sql
 schemasentry scan schema.sql --format md --out report.md
 ```
 
+## Local development
+
+```bash
+npm install
+npm test
+npm run scan:example
+```
+
+This writes an example report to `examples/report.md`.
+
 ## Output
 
 - Severity: **P0** (stop-ship), **P1** (high), **P2** (medium)

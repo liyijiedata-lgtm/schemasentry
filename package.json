@@ -1,0 +1,17 @@
+{
+  "name": "schemasentry",
+  "version": "0.1.0",
+  "description": "SchemaSentry Postgres schema scanner MVP",
+  "license": "UNLICENSED",
+  "type": "commonjs",
+  "bin": {
+    "schemasentry": "bin/schemasentry"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node tests/scan.test.js",
+    "scan:example": "node bin/schemasentry scan examples/schema.sql --format md --out examples/report.md"
+  }
+}
