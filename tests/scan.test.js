@@ -2,7 +2,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const { scanSql } = require('../src/scanner');
-const { renderMarkdownReport } = require('../src/report');
+const { renderMarkdownReport, renderSarifReport } = require('../src/report');
 
 const sqlPath = path.resolve('examples/schema.sql');
 const sql = fs.readFileSync(sqlPath, 'utf8');
@@ -27,5 +27,12 @@ const report = renderMarkdownReport(findings);
 assert.ok(report.includes('# SchemaSentry Report'), 'report should include title');
 assert.ok(report.includes('## Summary'), 'report should include summary');
 assert.ok(report.includes('## Findings'), 'report should include findings section');
+
+const sarif = renderSarifReport(findings, { artifactUri: 'schema.sql' });
+assert.equal(sarif.version, '2.1.0');
+assert.ok(Array.isArray(sarif.runs) && sarif.runs.length === 1, 'sarif should include one run');
+assert.ok(sarif.runs[0].tool && sarif.runs[0].tool.driver, 'sarif should include tool.driver');
+assert.ok(Array.isArray(sarif.runs[0].results), 'sarif should include results');
+assert.ok(sarif.runs[0].results[0].locations[0].physicalLocation.artifactLocation.uri === 'schema.sql');
 
 console.log(`tests passed with ${findings.length} findings`);

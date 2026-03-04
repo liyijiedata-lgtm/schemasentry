@@ -76,9 +76,9 @@ See: [`rules/POSTGRES_RULES_V1.md`](rules/POSTGRES_RULES_V1.md)
 
 - [x] MVP CLI: scan schema.sql → Markdown report
 - [x] GitHub Action (PR comment) (shadow mode)
-- [ ] CI gate (fail on P0, configurable, confidence-aware)
-- [ ] Config file (ignore/allowlist)
-- [ ] SARIF export
+- [x] CI gate (fail on P0/P1/P2 via `--fail-on`, respects ignore config)
+- [x] Config file (ignore/allowlist)
+- [x] SARIF export (`--format sarif`)
 - [ ] Pro ruleset hooks (core vs pro)
 - [ ] Connect-to-DB mode (introspect via `information_schema`)
 

@@ -11,7 +11,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "node tests/scan.test.js",
+    "test": "node tests/scan.test.js && node tests/cli.test.js",
     "scan:example": "node bin/schemasentry scan examples/schema.sql --format md --out examples/report.md"
   }
 }

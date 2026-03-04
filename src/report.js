@@ -4,6 +4,12 @@ function severityRank(sev) {
   return 2;
 }
 
+function toSarifLevel(sev) {
+  if (sev === 'P0') return 'error';
+  if (sev === 'P1') return 'warning';
+  return 'note';
+}
+
 function renderMarkdownReport(findings) {
   const summary = {
     P0: findings.filter((f) => f.severity === 'P0').length,
@@ -55,4 +61,63 @@ function renderMarkdownReport(findings) {
   return lines.join('\n');
 }
 
-module.exports = { renderMarkdownReport };
+function renderSarifReport(findings, opts = {}) {
+  const artifactUri = opts.artifactUri || 'schema.sql';
+
+  // De-duplicate rules by id.
+  const ruleMap = new Map();
+  for (const f of findings) {
+    if (!ruleMap.has(f.id)) {
+      ruleMap.set(f.id, {
+        id: f.id,
+        name: f.id,
+        shortDescription: { text: f.title },
+        fullDescription: { text: f.description },
+        help: { text: f.suggestedFix },
+        properties: { severity: f.severity },
+      });
+    }
+  }
+
+  const rules = [...ruleMap.values()].sort((a, b) => a.id.localeCompare(b.id));
+
+  const results = findings.map((f) => {
+    const evidence = (f.evidence || []).map((e) => `- ${e}`).join('\n');
+    const messageParts = [`[${f.severity}] ${f.title}`, f.description];
+    if (evidence) messageParts.push('Evidence:\n' + evidence);
+
+    return {
+      ruleId: f.id,
+      level: toSarifLevel(f.severity),
+      message: { text: messageParts.join('\n\n') },
+      locations: [
+        {
+          physicalLocation: {
+            artifactLocation: { uri: artifactUri },
+          },
+        },
+      ],
+      properties: {
+        severity: f.severity,
+      },
+    };
+  });
+
+  return {
+    $schema: 'https://json.schemastore.org/sarif-2.1.0.json',
+    version: '2.1.0',
+    runs: [
+      {
+        tool: {
+          driver: {
+            name: 'SchemaSentry',
+            rules,
+          },
+        },
+        results,
+      },
+    ],
+  };
+}
+
+module.exports = { renderMarkdownReport, renderSarifReport };
